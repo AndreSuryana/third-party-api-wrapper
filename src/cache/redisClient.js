@@ -1,18 +1,33 @@
 const { createClient } = require('redis')
+const config = require('../config/redisConfig')
 
-// Redis configuration
-const config = {
-    host: process.env.REDIS_HOST || '127.0.0.1',
-    port: parseInt(process.env.REDIS_PORT, 10) || 6379,
-    username: process.env.REDIS_USERNAME || '',
-    password: process.env.REDIS_PASSWORD || '',
-    db: parseInt(process.env.REDIS_DB, 10) || 0,
-    tls: process.env.REDIS_TLS === 'true'
-}
+// Max connection retries
+const MAX_RETRIES = 10
 
 // Create the Redis client with the configuration
 const client = createClient({
-    url: `${config.tls ? 'rediss' : 'redis'}://${config.username}:${config.password}@${config.host}:${config.port}/${config.db}`
+    username: config.username,
+    password: config.password,
+    database: config.database,
+    socket: {
+        host: config.host,
+        port: config.port,
+        tls: config.tls,
+        // Include TLS options only if TLS is enabled
+        ...(config.tls ? {
+            key: config.key,
+            cert: config.cert,
+            ca: config.ca,
+        } : {}),
+        reconnectStrategy: (retries) => {
+            if (retries > MAX_RETRIES) {
+                console.log("Too many attempts to reconnect. Redis connection was terminated")
+                return new Error("Too many retries.")
+            } else {
+                return retries * 500 // Delay
+            }
+        }
+    }
 })
 
 // Connect to Redis server asyncronously
