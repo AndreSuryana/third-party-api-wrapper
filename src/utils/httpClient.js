@@ -15,7 +15,7 @@ instance.interceptors.request.use(
         logger.debug(`Request: ${config.method.toUpperCase()} ${config.url}\nHeaders: ${JSON.stringify(config.headers)}\nParams: ${JSON.stringify(config.params)}\nData: ${config.data ? JSON.stringify(config.data) : 'None'}`)
         return config
     }, err => {
-        logger.error(`Request error: ${error.message}`)
+        logger.error(`Request error: ${err.message}`)
         return Promise.reject(err)
     }
 )

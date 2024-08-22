@@ -14,7 +14,9 @@ const getForecast = async (request, reply) => {
         const errorType = err.response?.statusText || 'Internal Server Error'
         const errorMessage = err.response?.data || 'An unexpected error occurred. Please try again later.'
 
-        reply.code(statusCode).send(errorResponseFormatter(statusCode, errorType, errorMessage))
+        reply.code(statusCode).send(
+            errorResponseFormatter(statusCode, errorType, errorMessage)
+        )
     }
 }
 
