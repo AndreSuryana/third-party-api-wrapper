@@ -1,5 +1,6 @@
 const { createClient } = require('redis')
 const config = require('../config/redisConfig')
+const logger = require('../utils/logger')
 
 // Max connection retries
 const MAX_RETRIES = 10
@@ -21,9 +22,10 @@ const client = createClient({
         } : {}),
         reconnectStrategy: (retries) => {
             if (retries > MAX_RETRIES) {
-                console.log("Too many attempts to reconnect. Redis connection was terminated")
-                return new Error("Too many retries.")
+                logger.error('Too many attempts to reconnect. Redis connection was terminated')
+                return new Error('Too many retries.')
             } else {
+                logger.info(`Retrying Redis connection attempt ${retries}...`)
                 return retries * 500 // Delay
             }
         }
@@ -34,14 +36,14 @@ const client = createClient({
 const connectRedis = async () => {
     try {
         await client.connect()
-        console.log('Connected to Redis successfully')
+        logger.info('Connected to Redis successfully')
     } catch (err) {
-        console.error('Redis connection error: ', err)
+        logger.error('Redis connection error:', err)
     }
 }
 
 // Listen for any errors
-client.on('error', err => console.error('Redis client error: ', err))
+client.on('error', err => logger.error('Redis client error:', err))
 
 // Call the connect method when initializing the client
 connectRedis()

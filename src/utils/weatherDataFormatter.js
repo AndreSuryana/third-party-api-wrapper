@@ -14,6 +14,11 @@ const getCompactForecastData = (data) => {
         max: data.maxt
     })
 
+    // Check if location and its values exist
+    if (!location || !Array.isArray(location.values)) {
+        throw new Error('Invalid data structure: location or location.values is missing.');
+    }
+
     // Extract and format forecast data
     const forecastData = location.values.map(day => ({
         date: new Date(day.datetime).toISOString().split('T')[0],

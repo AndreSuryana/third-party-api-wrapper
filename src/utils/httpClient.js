@@ -1,4 +1,5 @@
 const axios = require('axios')
+const logger = require('./logger')
 
 const instance = axios.create({
     baseURL: process.env.WEATHER_API_BASE_URL,
@@ -7,56 +8,27 @@ const instance = axios.create({
     }
 })
 
-// Interceptor to log the request and create a cURL command
-instance.interceptors.request.use(config => {
-    // Construct the full URL with query parameters
-    let url = `${config.baseURL}${config.url}`;
-    
-    if (config.params) {
-        const queryParams = new URLSearchParams(config.params).toString();
-        url += `?${queryParams}`;
-    }
-
-    // Build the cURL command
-    let curl = `curl --location '${url}'`;
-
-    // Add headers
-    for (let header in config.headers) {
-        curl += ` -H '${header}: ${config.headers[header]}'`;
-    }
-
-    // Log the generated cURL command
-    console.log('Generated cURL command:', curl);
-
-    return config;
-}, error => {
-    return Promise.reject(error);
-});
-
-// Add a request interceptor
+// Request Interceptor
 instance.interceptors.request.use(
-    function (config) {
-        // Do something before the request is sent
-        console.log('Request:', config)
+    config => {
+        // Log method, URL, headers, params, and data in a clean format
+        logger.debug(`Request: ${config.method.toUpperCase()} ${config.url}\nHeaders: ${JSON.stringify(config.headers)}\nParams: ${JSON.stringify(config.params)}\nData: ${config.data ? JSON.stringify(config.data) : 'None'}`)
         return config
-    },
-    function (error) {
-        // Do something with the request error
-        return Promise.reject(error)
+    }, err => {
+        logger.error(`Request error: ${error.message}`)
+        return Promise.reject(err)
     }
 )
 
-// Add a response interceptor
+// Response Interceptor
 instance.interceptors.response.use(
-    function (response) {
-        // Any status code that lies within the range of 2xx causes this function to trigger
-        console.log('Response:', response)
+    response => {
+        logger.debug(`Response: ${response.status} ${response.statusText}\nData: ${JSON.stringify(response.data)}`);
         return response;
     },
-    function (error) {
-        // Any status codes that falls outside the range of 2xx causes this function to trigger
-        console.error('Response Error:', error);
-        return Promise.reject(error)
+    err => {
+        logger.error('Response error:', err)
+        return Promise.reject(err)
     }
 )
 

@@ -1,4 +1,5 @@
 const { readFileSync } = require('fs')
+const logger = require('../utils/logger')
 
 const config = {
     host: process.env.REDIS_HOST || '127.0.0.1',
@@ -9,10 +10,20 @@ const config = {
     tls: process.env.REDIS_TLS === 'true',
     // Conditionally read TLS files if TLS is enabled
     ...(process.env.REDIS_TLS === 'true' ? {
-        key: process.env.REDIS_KEY ? readFileSync(process.env.REDIS_KEY) : undefined,
-        cert: process.env.REDIS_CERT ? readFileSync(process.env.REDIS_CERT) : undefined,
-        ca: process.env.REDIS_CA ? [readFileSync(process.env.REDIS_CA)] : []
+        key: readFileSafely(process.env.REDIS_KEY),
+        cert: readFileSafely(process.env.REDIS_CERT),
+        ca: process.env.REDIS_CA ? [readFileSafely(process.env.REDIS_CA)] : []
     } : {}),
+}
+
+// Function to read a file safely
+const readFileSafely = (filePath) => {
+    try {
+        return readFileSync(filePath)
+    } catch (err) {
+        logger.error(`Failed to read file at path ${filePath}: ${err.message}`)
+        return undefined
+    }
 }
 
 module.exports = config
