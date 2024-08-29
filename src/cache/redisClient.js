@@ -32,20 +32,16 @@ const client = createClient({
     }
 })
 
-// Connect to Redis server asyncronously
-const connectRedis = async () => {
-    try {
-        await client.connect()
-        logger.info('Connected to Redis successfully')
-    } catch (err) {
-        logger.error('Redis connection error:', err)
-    }
-}
+// Connect to Redis server when the client is initialized
+client.connect().then(() => {
+    logger.info('Connected to Redis successfully')
+}).catch(err => {
+    logger.error('Redis connection error:', err)
+})
 
-// Listen for any errors
-client.on('error', err => logger.error('Redis client error:', err))
-
-// Call the connect method when initializing the client
-connectRedis()
+// Listen for any errors globally
+client.on('error', err => {
+    logger.error('Redis client error:', err)
+})
 
 module.exports = client
