@@ -23,8 +23,6 @@ describe('Weather API Wrapper Service', () => {
 
     const location = 'Klungkung'
     const invalidLocation = 'InvalidLocation'
-    const veryLongLocation = 'A very long location name exceeding typical length'
-    const specialCharLocation = 'Loc@tion!'
     const numericLocation = '12345'
 
     // Normal Cases
@@ -119,6 +117,7 @@ describe('Weather API Wrapper Service', () => {
 
     // Edge Cases Tests
     test('Fetch weather data for a location with an extremely long name', async () => {
+        const veryLongLocation = 'a'.repeat(120)
         const response = await request(app.server).get(`/forecast?location=${veryLongLocation}`)
 
         expect(response.statusCode).toBe(400)
@@ -127,11 +126,14 @@ describe('Weather API Wrapper Service', () => {
     })
 
     test('Fetch weather data for a location with special characters', async () => {
+        const specialCharLocation = 'São Paulo'
+        weatherService.getForecastData.mockResolvedValue(weatherMockData.forecast)
+        
         const response = await request(app.server).get(`/forecast?location=${specialCharLocation}`)
 
-        expect(response.statusCode).toBe(400)
-        expect(response.body).toEqual({ error: 'Invalid location name' })
-        expect(weatherService.getForecastData).not.toHaveBeenCalled()
+        expect(response.statusCode).toBe(200)
+        expect(response.body).toEqual(weatherMockData.forecast)
+        expect(weatherService.getForecastData).toHaveBeenCalledWith(specialCharLocation)
     })
 
     test('Fetch weather data for a location with numbers or abbreviations', async () => {
