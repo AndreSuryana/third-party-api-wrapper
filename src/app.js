@@ -15,8 +15,13 @@ fastify.register(require('@fastify/autoload'), {
 
 // Set custom Fastify's built-in error response
 fastify.setErrorHandler((error, request, reply) => {
-    const { statusCode = 500, message } = error;
-    reply.code(statusCode).send({ error: message });
+    const { statusCode = 500, message } = error
+    reply.code(statusCode).send({ error: message || 'Internal Server Error' })
+})
+
+// Custom 404 handler
+fastify.setNotFoundHandler((request, reply) => {
+    reply.code(404).send({ error: 'Route not found' })
 })
 
 module.exports = fastify
