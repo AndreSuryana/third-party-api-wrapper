@@ -3,8 +3,8 @@ const redisClient = require('../cache/redisClient')
 const { getCompactForecastData } = require('../utils/weatherDataFormatter')
 const logger = require('../utils/logger')
 
-// Expired time for 6 hours
-const EXPIRED_CACHE_TIME = 21600000
+// Expired time for 6 hours in seconds
+const EXPIRED_CACHE_TIME = 21600
 
 const getForecastData = async (location) => {
     // Cache key based on location
