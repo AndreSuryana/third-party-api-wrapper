@@ -1,7 +1,6 @@
 const path = require('path')
 const Fastify = require('fastify')
 const fastifyLogger = require('./utils/fastifyLogger')
-const errorResponseFormatter = require('./utils/errorResponseFormatter')
 
 // Create Fastify instance with logger configuration based on environment
 const fastify = Fastify({ logger: fastifyLogger });
@@ -16,10 +15,8 @@ fastify.register(require('@fastify/autoload'), {
 
 // Set custom Fastify's built-in error response
 fastify.setErrorHandler((error, request, reply) => {
-    const { statusCode = 500, message, error: errorType } = error;
-    reply.code(statusCode).send(
-        errorResponseFormatter(statusCode, errorType || 'Internal Server Error', message)
-    );
+    const { statusCode = 500, message } = error;
+    reply.code(statusCode).send({ error: message });
 })
 
 module.exports = fastify
