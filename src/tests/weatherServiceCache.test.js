@@ -28,6 +28,7 @@ describe('Weather API Wrapper Service (Caching)', () => {
     const location = 'Klungkung'
     const newLocation = 'Jimbaran'
     const cacheKey = `weather:${location}`
+    const expiry = { EX: 21600 } // 6 hours in seconds
 
     test('Retrieve data from cache for a previously requested location', async () => {
         redisClient.get.mockResolvedValue(JSON.stringify(weatherMockData.forecast))
@@ -49,7 +50,7 @@ describe('Weather API Wrapper Service (Caching)', () => {
         expect(response.statusCode).toBe(200)
         expect(response.body).toEqual(weatherMockData.forecast)
         expect(redisClient.get).toHaveBeenCalledWith(`weather:${newLocation}`)
-        expect(redisClient.set).toHaveBeenCalledWith(`weather:${newLocation}`, JSON.stringify(weatherMockData.forecast))
+        expect(redisClient.set).toHaveBeenCalledWith(`weather:${newLocation}`, JSON.stringify(weatherMockData.forecast), expiry)
         expect(httpClient.get).toHaveBeenCalled()
     })
 
@@ -62,7 +63,7 @@ describe('Weather API Wrapper Service (Caching)', () => {
         expect(response.statusCode).toBe(200)
         expect(response.body).toEqual(weatherMockData.forecast)
         expect(redisClient.get).toHaveBeenCalledWith(cacheKey)
-        expect(redisClient.set).toHaveBeenCalledWith(cacheKey, JSON.stringify(weatherMockData.forecast))
+        expect(redisClient.set).toHaveBeenCalledWith(cacheKey, JSON.stringify(weatherMockData.forecast), expiry)
         expect(httpClient.get).toHaveBeenCalled()
     })
 
@@ -75,7 +76,7 @@ describe('Weather API Wrapper Service (Caching)', () => {
         expect(response.statusCode).toBe(200)
         expect(response.body).toEqual(weatherMockData.forecast)
         expect(redisClient.get).toHaveBeenCalledWith(cacheKey)
-        expect(redisClient.set).toHaveBeenCalledWith(cacheKey, JSON.stringify(weatherMockData.forecast))
+        expect(redisClient.set).toHaveBeenCalledWith(cacheKey, JSON.stringify(weatherMockData.forecast), expiry)
         expect(httpClient.get).toHaveBeenCalled()
     })
 
@@ -89,7 +90,7 @@ describe('Weather API Wrapper Service (Caching)', () => {
         expect(response.statusCode).toBe(200)
         expect(response.body).toEqual(weatherMockData.forecast)
         expect(redisClient.get).toHaveBeenCalledWith(`weather:${newLocation}`)
-        expect(redisClient.set).toHaveBeenCalledWith(`weather:${newLocation}`, JSON.stringify(weatherMockData.forecast))
+        expect(redisClient.set).toHaveBeenCalledWith(`weather:${newLocation}`, JSON.stringify(weatherMockData.forecast), expiry)
         expect(httpClient.get).toHaveBeenCalled()
     })
 
@@ -102,7 +103,7 @@ describe('Weather API Wrapper Service (Caching)', () => {
         expect(response.statusCode).toBe(200)
         expect(response.body).toEqual(weatherMockData.forecast)
         expect(redisClient.get).toHaveBeenCalledWith(cacheKey)
-        expect(redisClient.set).toHaveBeenCalledWith(cacheKey, JSON.stringify(weatherMockData.forecast))
+        expect(redisClient.set).toHaveBeenCalledWith(cacheKey, JSON.stringify(weatherMockData.forecast), expiry)
         expect(httpClient.get).toHaveBeenCalled()
     })
 
@@ -128,7 +129,7 @@ describe('Weather API Wrapper Service (Caching)', () => {
         expect(response.statusCode).toBe(200)
         expect(response.body).toEqual(weatherMockData.forecast)
         expect(redisClient.get).toHaveBeenCalledWith(cacheKey)
-        expect(redisClient.set).toHaveBeenCalledTimes(2) // First time and after invalidation
+        expect(redisClient.set).toHaveBeenCalledTimes(1) // Only after invalidation
         expect(httpClient.get).toHaveBeenCalledTimes(1)
     })
 })
