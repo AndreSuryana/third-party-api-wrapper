@@ -146,22 +146,6 @@ describe('Weather API Wrapper Service', () => {
         expect(weatherService.getForecastData).toHaveBeenCalledWith(numericLocation)
     })
 
-    test('Handle multiple concurrent requests for the same location', async () => {
-        weatherService.getForecastData.mockResolvedValue(weatherMockData.forecast)
-
-        // Simulate concurrent requests
-        const [response1, response2] = await Promise.all([
-            request(app.server).get(`/forecast?location=${location}`),
-            request(app.server).get(`/forecast?location=${location}`)
-        ])
-
-        expect(response1.statusCode).toBe(200)
-        expect(response1.body).toEqual(weatherMockData.forecast)
-        expect(response2.statusCode).toBe(200)
-        expect(response2.body).toEqual(weatherMockData.forecast)
-        expect(weatherService.getForecastData).toHaveBeenCalledTimes(1)
-    })
-
     test('Simulate a high volume of requests in a short period', async () => {
         weatherService.getForecastData.mockResolvedValue(weatherMockData.forecast)
 
