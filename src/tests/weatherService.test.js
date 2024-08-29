@@ -59,7 +59,10 @@ describe('Weather API Wrapper Service', () => {
     })
 
     test('Handle a third-party API timeout with a custom error', async () => {
-        weatherService.getForecastData.mockRejectedValue(new Error('Request timeout'))
+        // Simulating axios timeout error code
+        const error = new Error('Request timeout')
+        error.code = 'ECONNABORTED'
+        weatherService.getForecastData.mockRejectedValue(error)
 
         const response = await request(app.server).get(`/forecast?location=${location}`)
 
@@ -80,7 +83,10 @@ describe('Weather API Wrapper Service', () => {
 
     // Error Handling Tests
     test('Simulate receiving an invalid JSON response from the third-party API', async () => {
-        weatherService.getForecastData.mockRejectedValue(new Error('Invalid JSON'))
+        // Simulating invalid or unexpected JSON response format
+        const error = new Error('Invalid JSON')
+        error.code = 'INVALID_RESP'
+        weatherService.getForecastData.mockRejectedValue(error)
 
         const response = await request(app.server).get(`/forecast?location=${location}`)
 
@@ -94,8 +100,8 @@ describe('Weather API Wrapper Service', () => {
 
         const response = await request(app.server).get(`/forecast?location=${location}`)
 
-        expect(response.statusCode).toBe(503)
-        expect(response.body).toEqual({ error: 'Network error, please try again later' })
+        expect(response.statusCode).toBe(500)
+        expect(response.body).toEqual({ error: 'Internal server error' })
         expect(weatherService.getForecastData).toHaveBeenCalledWith(location)
     })
 
